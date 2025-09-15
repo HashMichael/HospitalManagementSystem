@@ -127,5 +127,8 @@ public class AppointmentService {
         }
         return appointments;
     }
+
+    public void updateAppointmentStatus(Appointment a) {
+    }
 }
 

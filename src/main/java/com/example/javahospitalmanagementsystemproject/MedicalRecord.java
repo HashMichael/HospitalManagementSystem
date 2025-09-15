@@ -22,6 +22,9 @@ public class MedicalRecord {
         this.recordDate = recordDate;
     }
 
+    public MedicalRecord(int i, int parseInt, String text, String text1) {
+    }
+
     public int getId() {
         return id;
     }
