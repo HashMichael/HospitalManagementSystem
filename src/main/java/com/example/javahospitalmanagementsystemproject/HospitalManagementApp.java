@@ -272,7 +272,7 @@ public class HospitalManagementApp extends Application {
         Button addButton = new Button("Add");
         addButton.setOnAction(e -> {
             try {
-                
+
                 LocalDate selectedDate = datePicker.getValue();
                 LocalDate today = LocalDate.now();
 
