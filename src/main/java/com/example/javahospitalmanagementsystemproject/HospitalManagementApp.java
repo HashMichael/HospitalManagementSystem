@@ -100,8 +100,19 @@ public class HospitalManagementApp extends Application {
         Button addButton = new Button("Add");
         addButton.setOnAction(e -> {
             try {
-                Patient p = new Patient(0, nameField.getText(),
-                        Integer.parseInt(ageField.getText()), phoneField.getText(), addressField.getText());
+                String name = nameField.getText().trim();
+                String ageText = ageField.getText().trim();
+                String phone = phoneField.getText().trim();
+                String address = addressField.getText().trim();
+
+                if (name.isEmpty() || ageText.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+                    showAlert("Error", "All fields must be filled!");
+                    return;
+                }
+
+                int age = Integer.parseInt(ageText);
+
+                Patient p = new Patient(0, nameField.getText(), age, phoneField.getText(), addressField.getText());
                 patientService.addPatient(p);
                 showAlert("Success", "Patient added!");
                 clearFields(idField, nameField, ageField, phoneField, addressField);
@@ -175,7 +186,16 @@ public class HospitalManagementApp extends Application {
         Button addButton = new Button("Add");
         addButton.setOnAction(e -> {
             try {
-                Doctor d = new Doctor(0, nameField.getText(), specializationField.getText(), phoneField.getText());
+                String name = nameField.getText().trim();
+                String specialization = specializationField.getText().trim();
+                String phone = phoneField.getText().trim();
+
+                if (name.isEmpty() || specialization.isEmpty() || phone.isEmpty()) {
+                    showAlert("Error", "All fields must be filled!");
+                    return;
+                }
+
+                Doctor d = new Doctor(0, name, specialization, phone);
                 doctorService.addDoctor(d);
                 showAlert("Success", "Doctor added!");
             } catch (Exception ex) {
@@ -252,12 +272,37 @@ public class HospitalManagementApp extends Application {
         Button addButton = new Button("Add");
         addButton.setOnAction(e -> {
             try {
-                Appointment a = new Appointment(0,
+                
+                LocalDate selectedDate = datePicker.getValue();
+                LocalDate today = LocalDate.now();
+
+                if (selectedDate == null) {
+                    showAlert("Error", "Please select a date!");
+                    return;
+                }
+
+                if (selectedDate.isBefore(today)) {
+                    showAlert("Error", "Appointment date cannot be in the past!");
+                    return;
+                }
+
+                LocalTime selectedTime = LocalTime.parse(timeField.getText());
+                LocalTime now = LocalTime.now();
+
+                if (selectedDate.equals(today) && selectedTime.isBefore(now)){
+                    showAlert("Error", "Appointment time cannot be in the past!");
+                    return;
+                }
+
+                Appointment a = new Appointment(
+                        0,
                         Integer.parseInt(patientIdField.getText()),
                         Integer.parseInt(doctorIdField.getText()),
-                        datePicker.getValue(),
-                        LocalTime.parse(timeField.getText()),
-                        statusField.getText());
+                        selectedDate,
+                        selectedTime,
+                        statusField.getText()
+                );
+
                 appointmentService.addAppointment(a);
                 showAlert("Success", "Appointment added!");
             } catch (Exception ex) {
@@ -302,18 +347,7 @@ public class HospitalManagementApp extends Application {
             }
         });
 
-        // ✅ New: Update Status Only
-        Button updateStatusButton = new Button("Update Status");
-        updateStatusButton.setOnAction(e -> {
-            try {
-                appointmentService.updateAppointmentStatus(Integer.parseInt(idField.getText()), statusField.getText());
-                showAlert("Success", "Appointment status updated!");
-            } catch (Exception ex) {
-                showAlert("Error", ex.getMessage());
-            }
-        });
-
-        form.addRow(6, addButton, getButton, updateButton, deleteButton, updateStatusButton);
+        form.addRow(6, addButton, getButton, updateButton, deleteButton);
 
         ListView<String> appointmentList = new ListView<>();
 
@@ -368,17 +402,36 @@ public class HospitalManagementApp extends Application {
         TextField patientIdField = new TextField();
         TextArea diagnosisArea = new TextArea();
         TextArea treatmentArea = new TextArea();
+        TextArea prescriptionArea = new TextArea();
+        DatePicker datePicker = new DatePicker();
+
 
         form.add(new Label("ID:"), 0, 0); form.add(idField, 1, 0);
         form.add(new Label("Patient ID:"), 0, 1); form.add(patientIdField, 1, 1);
         form.add(new Label("Diagnosis:"), 0, 2); form.add(diagnosisArea, 1, 2);
         form.add(new Label("Treatment:"), 0, 3); form.add(treatmentArea, 1, 3);
+        form.add(new Label("Prescription"), 0, 4); form.add(prescriptionArea, 1, 4);
+        form.add(new Label("RecordDate:"), 0, 5); form.add(datePicker, 1, 5);
 
         Button addButton = new Button("Add");
         addButton.setOnAction(e -> {
             try {
+
+                LocalDate selectedDate = datePicker.getValue();
+                LocalDate today = LocalDate.now();
+
+                if (selectedDate == null) {
+                    showAlert("Error", "Please select a date!");
+                    return;
+                }
+
+                if (selectedDate.isBefore(today)) {
+                    showAlert("Error", "Appointment date cannot be in the past!");
+                    return;
+                }
+
                 MedicalRecord r = new MedicalRecord(0, Integer.parseInt(patientIdField.getText()),
-                        diagnosisArea.getText(), treatmentArea.getText());
+                        diagnosisArea.getText(), treatmentArea.getText(), prescriptionArea.getText(), selectedDate);
                 medicalRecordService.addMedicalRecord(r);
                 showAlert("Success", "Record added!");
             } catch (Exception ex) {
@@ -400,15 +453,35 @@ public class HospitalManagementApp extends Application {
         Button updateButton = new Button("Update");
         updateButton.setOnAction(e -> {
             try {
-                MedicalRecord r = new MedicalRecord(Integer.parseInt(idField.getText()),
+                LocalDate selectedDate = datePicker.getValue();
+                LocalDate today = LocalDate.now();
+
+                if (selectedDate == null) {
+                    showAlert("Error", "Please select a date!");
+                    return;
+                }
+
+                if (selectedDate.isBefore(today)) {
+                    showAlert("Error", "Record date cannot be in the past!");
+                    return;
+                }
+
+                MedicalRecord r = new MedicalRecord(
+                        Integer.parseInt(idField.getText()),
                         Integer.parseInt(patientIdField.getText()),
-                        diagnosisArea.getText(), treatmentArea.getText());
+                        diagnosisArea.getText(),
+                        treatmentArea.getText(),
+                        prescriptionArea.getText(),
+                        selectedDate
+                );
+
                 medicalRecordService.updateMedicalRecord(r);
                 showAlert("Success", "Record updated!");
             } catch (Exception ex) {
                 showAlert("Error", ex.getMessage());
             }
         });
+
 
         Button deleteButton = new Button("Delete");
         deleteButton.setOnAction(e -> {

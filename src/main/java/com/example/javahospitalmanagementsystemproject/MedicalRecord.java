@@ -1,5 +1,9 @@
 package com.example.javahospitalmanagementsystemproject;
 
+import javafx.scene.control.DatePicker;
+
+import java.time.LocalDate;
+
 public class MedicalRecord {
     private int id;
     private int patientId;
@@ -22,7 +26,7 @@ public class MedicalRecord {
         this.recordDate = recordDate;
     }
 
-    public MedicalRecord(int i, int parseInt, String text, String text1) {
+    public MedicalRecord(int i, int parseInt, String text, String text1, String text2, LocalDate selectedDate) {
     }
 
     public int getId() {
